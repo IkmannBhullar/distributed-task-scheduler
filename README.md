@@ -27,7 +27,7 @@ The system uses a **Producer-Consumer** pattern with **Redis** serving as the re
 graph TD
     User[User / Client] -->|HTTP POST| API[Next.js API Route]
 
-    subgraph "Infrastructure"
+    subgraph Infrastructure
         Redis[(Redis Queue)]
         Dashboard[Real-Time Dashboard]
     end
@@ -40,9 +40,9 @@ graph TD
 
     API -->|LPUSH Job| Redis
 
-    Redis <-->|RPOPLPUSH (Atomic)| W1
-    Redis <-->|RPOPLPUSH (Atomic)| W2
-    Redis <-->|RPOPLPUSH (Atomic)| W3
+    Redis -->|"RPOPLPUSH (Atomic)"| W1
+    Redis -->|"RPOPLPUSH (Atomic)"| W2
+    Redis -->|"RPOPLPUSH (Atomic)"| W3
 
     W1 -.->|Update Status| Dashboard
     W2 -.->|Update Status| Dashboard
