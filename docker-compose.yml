@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # 1. The Queue (Infrastructure)
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  # 2. Redis Dashboard (Infrastructure)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  # 3. The Worker (Our Code) - We will scale this!
+  worker:
+    build: .
+    # This command overrides the default. We run the worker script.
+    command: npx ts-node worker.ts
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis 
+      # Note: 'redis' is the hostname inside the Docker network
+    networks:
+      - app-network
+    deploy:
+      mode: replicated
+      replicas: 3  # <--- MAGIC! Starts 3 workers automatically
+
+  # 4. The Producer (Our Code)
+  producer:
+    build: .
+    command: npx ts-node producer.ts
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
