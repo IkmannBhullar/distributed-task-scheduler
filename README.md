@@ -1,54 +1,50 @@
-# 🚀 Distributed Task Scheduler & Monitor
+# 🔥 Distributed Grill: High-Throughput Task Scheduler
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
-![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
 
-A high-throughput, fault-tolerant distributed system capable of handling concurrent background jobs with zero data loss. Includes a real-time dashboard for monitoring system health.
+> **A real-time visualization of a fault-tolerant, microservices-based job queue system.**
 
----
+![Project Screenshot](https://via.placeholder.com/800x400?text=Paste+Your+Screenshot+Here)
 
-## 🍔 The Concept: "The Kitchen Analogy"
+## 💡 The Concept
 
-Understanding distributed systems can be complex. Think of this application like a busy restaurant kitchen:
+This project demonstrates **Distributed System Architecture** by visualizing background jobs as "Food Orders" in a busy restaurant.
 
-1.  **The Producer (The Cashier):** \* _Real World:_ Takes orders from customers instantly.
-    - _This App:_ An API that accepts jobs and places them on the "Ticket Rail" (Redis Queue). It handles high traffic without slowing down.
-2.  **The Queue (The Ticket Rail):** \* _Real World:_ Holds the orders in line so no request is lost.
-    - _This App:_ A Redis list that acts as a buffer between the fast API and the heavy processing.
-3.  **The Workers (The Chefs):** \* _Real World:_ They grab tickets one by one and cook the meal. If the restaurant gets busy, you hire more chefs.
-    - _This App:_ Node.js microservices that pick up jobs, process them, and mark them as done. This system scales horizontally—you can spin up 100 workers with one command.
+Instead of a boring list of logs, it uses a **Mission Control Dashboard** to show how high-volume requests are queued, processed by parallel worker nodes, and completed—all in real-time.
+
+**It answers the question:** _"How do companies like Uber or DoorDash handle millions of requests without crashing?"_
 
 ---
 
-## 📸 System Architecture
+## 🏗️ System Architecture
+
+The system uses a **Producer-Consumer** pattern with **Redis** serving as the reliable message broker between the Next.js frontend (Producer) and the Node.js Microservices (Consumers).
 
 ```mermaid
 graph TD
-    User[User / Client] -->|HTTP Request| API[Producer API]
+    User[User / Client] -->|HTTP POST| API[Next.js API Route]
 
-    subgraph Infrastructure
+    subgraph "Infrastructure"
         Redis[(Redis Queue)]
-        Dashboard[Next.js Dashboard]
+        Dashboard[Real-Time Dashboard]
     end
 
-    subgraph Worker Cluster
+    subgraph "Worker Cluster (Docker)"
         W1[Worker Node 1]
         W2[Worker Node 2]
         W3[Worker Node 3]
     end
 
-    API -->|LPUSH job| Redis
+    API -->|LPUSH Job| Redis
 
-    Redis <-->|RPOPLPUSH| W1
-    Redis <-->|RPOPLPUSH| W2
-    Redis <-->|RPOPLPUSH| W3
+    Redis <-->|RPOPLPUSH (Atomic)| W1
+    Redis <-->|RPOPLPUSH (Atomic)| W2
+    Redis <-->|RPOPLPUSH (Atomic)| W3
 
-    W1 -.->|WebSocket Update| Dashboard
-    W2 -.->|WebSocket Update| Dashboard
-    W3 -.->|WebSocket Update| Dashboard
-
-    Redis -.->|Poll Status| Dashboard
+    W1 -.->|Update Status| Dashboard
+    W2 -.->|Update Status| Dashboard
+    W3 -.->|Update Status| Dashboard
 ```
