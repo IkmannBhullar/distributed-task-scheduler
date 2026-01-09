@@ -36,6 +36,7 @@ services:
     deploy:
       mode: replicated
       replicas: 3  # <--- MAGIC! Starts 3 workers automatically
+      restart: always # Restart policy
 
   # 4. The Producer (Our Code)
   producer:
@@ -47,6 +48,14 @@ services:
       - REDIS_HOST=redis
     networks:
       - app-network
+
+# 5. The Safety Inspector
+  autofix:
+    build: .
+    command: npx ts-node autofix.ts
+    depends_on: [redis]
+    environment: [REDIS_HOST=redis]
+    networks: [app-network]
 
 networks:
   app-network:
